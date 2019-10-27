@@ -91,7 +91,7 @@ func LineJWT() echo.MiddlewareFunc {
 					}
 				}
 
-				if strings.Compare(resVer.ClientID, channelID) != 0 {
+				if !isValidChannelID(resVer.ClientID) {
 					err := errors.New("invalid jwt")
 					return &echo.HTTPError{
 						Code:     http.StatusUnauthorized,
@@ -100,7 +100,7 @@ func LineJWT() echo.MiddlewareFunc {
 					}
 				}
 
-				if resVer.ExpiresIn < 0 {
+				if isExpired(resVer.ExpiresIn) {
 					err := errors.New("expired jwt")
 					return &echo.HTTPError{
 						Code:     http.StatusUnauthorized,
@@ -112,6 +112,20 @@ func LineJWT() echo.MiddlewareFunc {
 			return next(c)
 		}
 	}
+}
+
+func isExpired(expiresIn int) bool {
+	if expiresIn > 0 {
+		return false
+	}
+	return true
+}
+
+func isValidChannelID(clientID string) bool {
+	if strings.Compare(clientID, channelID) != 0 {
+		return false
+	}
+	return true
 }
 
 func getToken(authVal string) string {
