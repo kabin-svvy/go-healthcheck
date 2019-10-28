@@ -32,15 +32,15 @@ func (c *Context) JSON(code int, i interface{}) error {
 
 func TestCreateShouldBeSuccess(t *testing.T) {
 	t.Run("test create should be success", func(t *testing.T) {
-		expected := "success"
+		expected := 200
 		c := &Context{}
 		err := Create(c)
 		if err != nil {
 			log.Println(err)
 		}
-		log.Println(c.code)
-		res := c.response.(Response)
-		actual := res.Message
+		actual := c.code
+		// res := c.response.(Response)
+		// actual := res.Message
 		assert.Equal(t, expected, actual, "test create should be %v but get %v", expected, actual)
 	})
 }
