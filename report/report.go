@@ -2,9 +2,9 @@ package report
 
 import (
 	"errors"
+	"io/ioutil"
 	"net/http"
-
-	"github.com/labstack/echo/v4"
+	"time"
 )
 
 // Request .
@@ -15,51 +15,42 @@ type Request struct {
 	TotalTime     int64 `json:"total_time"`
 }
 
-// Response .
-type Response struct {
-	Message string `json:"message"`
-}
-
-// Create .
-func Create(c echo.Context) error {
-	req := &Request{}
-	err := c.Bind(req)
+// HealthCheck .
+func (r *Request) HealthCheck(uri string) error {
+	now := time.Now()
+	nano := now.UnixNano()
+	defer r.AddTotalTime(nano)
+	r.TotalWebsites++
+	req, err := http.NewRequest(http.MethodGet, uri, nil)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, Response{
-			Message: err.Error(),
-		})
+		r.Failure++
+		return err
 	}
-	if err := req.validate(); err != nil {
-		return c.JSON(http.StatusBadRequest, Response{
-			Message: err.Error(),
-		})
+
+	res, err := http.DefaultClient.Do(req)
+	if err != nil {
+		r.Failure++
+		return err
 	}
-	return c.JSON(http.StatusOK, Response{
-		Message: "success",
-	})
+	defer res.Body.Close()
+
+	_, err = ioutil.ReadAll(res.Body)
+	if err != nil {
+		r.Failure++
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		r.Failure++
+		return errors.New(res.Status)
+	}
+	r.Success++
+	return nil
 }
 
-func (r Request) validate() error {
-	if r.TotalWebsites < 0 {
-		return errors.New("request total websites should equal or more than zero")
-	}
-	if r.Success < 0 {
-		return errors.New("request success should equal or more than zero")
-	}
-	if r.Success > r.TotalWebsites {
-		return errors.New("request success should equal or less than total websites")
-	}
-	if r.Failure < 0 {
-		return errors.New("request failure should equal or more than zero")
-	}
-	if r.Failure > r.TotalWebsites {
-		return errors.New("request failure should equal or less than total websites")
-	}
-	if r.Success+r.Failure > r.TotalWebsites {
-		return errors.New("request success and failure should equal or less than total websites")
-	}
-	if r.TotalTime < 0 {
-		return errors.New("request total time should more than zero")
-	}
-	return nil
+// AddTotalTime .
+func (r *Request) AddTotalTime(start int64) {
+	now := time.Now()
+	nano := now.UnixNano()
+	r.TotalTime += (nano - start)
 }

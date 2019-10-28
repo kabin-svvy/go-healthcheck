@@ -1,21 +1,47 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"encoding/csv"
+	"fmt"
+	"io"
+	"log"
+	"os"
 
-	"github.com/kabin-svvy/go-healthcheck/line/api/verify"
 	"github.com/kabin-svvy/go-healthcheck/report"
 )
 
+var (
+	fullPath = "test.csv"
+)
+
 func main() {
-	e := echo.New()
+	args := os.Args
+	if len(args) > 1 {
+		fullPath = args[1]
+	}
 
-	e.Use(middleware.Logger())
-	e.Use(middleware.Recover())
-	e.Use(verify.LineJWT())
+	csvfile, err := os.Open(fullPath)
+	if err != nil {
+		log.Fatalln("failure to open csv,", err)
+	}
 
-	e.POST("/healthcheck/report", report.Create)
+	r := csv.NewReader(csvfile)
 
-	e.Logger.Fatal(e.Start(":1323"))
+	req := report.Request{}
+
+	for {
+		record, err := r.Read()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		if len(record) > 0 {
+			fmt.Printf("uri %v\n", record[0])
+			req.HealthCheck(record[0])
+		}
+	}
+	fmt.Printf("report healthcheck %+v\n", req)
 }
