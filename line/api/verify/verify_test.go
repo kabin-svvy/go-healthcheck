@@ -31,7 +31,7 @@ func TestVerifyShouldBeSuccess(t *testing.T) {
 
 		if assert.NoError(t, h(c), "verify code error") {
 			actual := c.Response().Status
-			assert.Equal(t, expected, actual, "verify code should be %v but get &v")
+			assert.Equal(t, expected, actual, "verify code should be %v but get &v", expected, actual)
 		}
 	})
 }
@@ -51,7 +51,7 @@ func TestVerifyShouldNotExist(t *testing.T) {
 
 		h := LineJWT()(handler)
 		actual := h(c).(*echo.HTTPError).Message
-		assert.Equal(t, expected, actual, "verify message should be : %v, but get : &v")
+		assert.Equal(t, expected, actual, "verify message should be : %v, but get : &v", expected, actual)
 	})
 }
 
@@ -59,13 +59,13 @@ func TestIsValidChannelID(t *testing.T) {
 	t.Run("valid channel id should be true", func(t *testing.T) {
 		expected := true
 		actual := isValidChannelID(channelID)
-		assert.Equal(t, expected, actual, "valid channel id should be : %v, but get : &v")
+		assert.Equal(t, expected, actual, "valid channel id should be : %v, but get : &v", expected, actual)
 	})
 
 	t.Run("valid channel id should be false", func(t *testing.T) {
 		expected := false
 		actual := isValidChannelID("fakeChannelID")
-		assert.Equal(t, expected, actual, "valid channel id should be : %v, and : &v")
+		assert.Equal(t, expected, actual, "valid channel id should be : %v, and : &v", expected, actual)
 	})
 }
 
