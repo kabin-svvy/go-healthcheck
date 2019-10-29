@@ -6,8 +6,10 @@ import (
 	"io"
 	"log"
 	"os"
+	"strings"
 
 	"github.com/kabin-svvy/go-healthcheck/report"
+	"github.com/spf13/viper"
 )
 
 var (
@@ -15,6 +17,17 @@ var (
 )
 
 func main() {
+
+	v, err := getConfig("config", "./")
+	if err != nil {
+		log.Fatalf("load config failed %v", err)
+	}
+
+	h := report.Handler{
+		URL:         v.GetString("report.uri"),
+		AccessToken: v.GetString("report.access_token"),
+	}
+
 	args := os.Args
 	if len(args) > 1 {
 		fullPath = args[1]
@@ -44,4 +57,26 @@ func main() {
 		}
 	}
 	fmt.Printf("report healthcheck %+v\n", req)
+
+	if req.TotalWebsites > 0 {
+		err := h.SendReport(req)
+		if err != nil {
+			log.Fatalf("send report error %v", err)
+		}
+		log.Printf("send report success")
+	}
+}
+
+func getConfig(fileName string, filePath string) (*viper.Viper, error) {
+	v := viper.New()
+	v.SetConfigName(fileName)
+	v.AddConfigPath(filePath)
+	v.AutomaticEnv()
+	v.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+
+	err := v.ReadInConfig()
+	if err != nil {
+		return nil, err
+	}
+	return v, nil
 }
