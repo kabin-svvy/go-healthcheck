@@ -61,7 +61,7 @@ func main() {
 
 	if req.TotalWebsites > 0 {
 		res, status, err := h.SendReport(req)
-		log.Printf("%+v", res)
+		log.Printf("%+v\n", res)
 		if err != nil {
 			log.Fatalf("send report error %v", err)
 		}
