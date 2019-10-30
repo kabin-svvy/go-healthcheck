@@ -60,7 +60,8 @@ func main() {
 	fmt.Printf("report healthcheck %+v\n", req)
 
 	if req.TotalWebsites > 0 {
-		status, err := h.SendReport(req)
+		res, status, err := h.SendReport(req)
+		log.Printf("%+v", res)
 		if err != nil {
 			log.Fatalf("send report error %v", err)
 		}

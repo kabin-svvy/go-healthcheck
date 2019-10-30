@@ -1,6 +1,7 @@
 package report
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -19,7 +20,8 @@ func TestSendReportShouldGet200(t *testing.T) {
 			Failure:       1,
 			TotalTime:     100000,
 		}
-		actual, _ := h.SendReport(req)
+		res, actual, _ := h.SendReport(req)
+		fmt.Printf("%+v\n", res)
 		assert.Equal(t, expected, actual, "send report should get %v but get %v", expected, actual)
 	})
 }
@@ -37,7 +39,8 @@ func TestSendReportShouldGet404WithFakeURL(t *testing.T) {
 			Failure:       1,
 			TotalTime:     100000,
 		}
-		actual, _ := h.SendReport(req)
+		res, actual, _ := h.SendReport(req)
+		fmt.Printf("%+v\n", res)
 		assert.Equal(t, expected, actual, "send report should get %v but get %v", expected, actual)
 	})
 }
@@ -55,7 +58,8 @@ func TestSendReportShouldGet400WithFakeToken(t *testing.T) {
 			Failure:       1,
 			TotalTime:     100000,
 		}
-		actual, _ := h.SendReport(req)
+		res, actual, _ := h.SendReport(req)
+		fmt.Printf("%+v\n", res)
 		assert.Equal(t, expected, actual, "send report should get %v but get %v", expected, actual)
 	})
 }
@@ -65,7 +69,7 @@ func TestSendReportShouldGet400WithBadRequest(t *testing.T) {
 		expected := 400
 		h := Handler{
 			URL:         `http://localhost:1323/healthcheck/report`,
-			AccessToken: `fakeToken`,
+			AccessToken: `eyJhbGciOiJIUzI1NiJ9.gYp-4ieS6GdXCU3QOduonlmLAU7E1Tz-DdksGX0a6SinuXLOSqos2Q6zBJiSze7leabHwQQT6DE4qGWtX4dHyzr5CfZZ_HYvU9d7bYRAAIVlCZttEcR4B5q_2SN1KOjD7Ly_I5j6btG0VoXwcNqtZqfxXNUeL9kc4SVVx9g6tFI.CKFYwLEzx63vtmFcWJGIZa1nLllmlpZquIUfhZI7h4E`,
 		}
 		req := Request{
 			TotalWebsites: 0,
@@ -73,7 +77,8 @@ func TestSendReportShouldGet400WithBadRequest(t *testing.T) {
 			Failure:       1,
 			TotalTime:     100000,
 		}
-		actual, _ := h.SendReport(req)
+		res, actual, _ := h.SendReport(req)
+		fmt.Printf("%+v\n", res)
 		assert.Equal(t, expected, actual, "send report should get %v but get %v", expected, actual)
 	})
 }
