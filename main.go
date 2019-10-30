@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net/http"
 	"os"
 	"strings"
 
@@ -13,7 +14,7 @@ import (
 )
 
 var (
-	fullPath = "test.csv"
+	fullPath = ""
 )
 
 func main() {
@@ -59,9 +60,12 @@ func main() {
 	fmt.Printf("report healthcheck %+v\n", req)
 
 	if req.TotalWebsites > 0 {
-		err := h.SendReport(req)
+		status, err := h.SendReport(req)
 		if err != nil {
 			log.Fatalf("send report error %v", err)
+		}
+		if status != http.StatusOK {
+			log.Printf("send report failure with status %v", status)
 		}
 		log.Printf("send report success")
 	}

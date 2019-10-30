@@ -1,20 +1,11 @@
 package report
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
 )
-
-// Handler .
-type Handler struct {
-	URL         string
-	AccessToken string
-}
 
 // Request .
 type Request struct {
@@ -64,36 +55,4 @@ func (r *Request) AddTotalTime(start int64) {
 	now := time.Now()
 	nano := now.UnixNano()
 	r.TotalTime += (nano - start)
-}
-
-// SendReport .
-func (h Handler) SendReport(req Request) error {
-	reqBody, err := json.Marshal(req)
-	if err != nil {
-		return err
-	}
-	newResp, err := http.NewRequest(http.MethodPost, h.URL, bytes.NewBuffer(reqBody))
-	if err != nil {
-		return err
-	}
-	newResp.Header.Add("Content-Type", "application/json")
-	newResp.Header.Add("Authorization", fmt.Sprintf("Bearer %v", h.AccessToken))
-
-	resp, err := http.DefaultClient.Do(newResp)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	_, err = ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(resp.Status)
-	}
-
-	return nil
 }
